@@ -16,12 +16,13 @@ const ll MOD = 1e9 + 7;
 
 class SGTree{
     public:
-    vector<ll> seg;
+    vector<pair<ll, ll>> seg;
 
     void build(ll index, ll low, ll high, vector<ll>& arr){
 
         if (low == high){
-            seg[index] = arr[low];
+            seg[index].first = arr[low];
+            seg[index].second = arr[low];
             return;
         }
 
@@ -30,11 +31,11 @@ class SGTree{
         build(2*index + 1, low, mid, arr);
         build(2*index + 2, mid+1, high, arr);
 
-        seg[index] = min(seg[2*index+1], seg[2*index+2]);
-
+        seg[index].first = min(seg[2*index+1].first, seg[2*index+2].first);
+        seg[index].second = seg[2*index+1].second + seg[2*index+2].second;
     }
     
-    ll query(ll index, ll low, ll high, ll left, ll right){
+    ll queryMin(ll index, ll low, ll high, ll left, ll right){
         // no overlap [low, high] [l, r] or [l, r][low, high]
         if (high < left || right < low){
             return INT_MAX;
@@ -42,21 +43,42 @@ class SGTree{
 
         // complete overlap: node's range lies completely in query range [left, low, high, right]
         if (left <= low && high <= right){
-            return seg[index];
+            return seg[index].first;
         }
 
         // partial overlaps
         ll mid = low + (high - low)/2;
-        ll lans = query(2*index+1, low, mid, left, right);
-        ll rans = query(2*index+2, mid+1, high, left, right);
+        ll lans = queryMin(2*index+1, low, mid, left, right);
+        ll rans = queryMin(2*index+2, mid+1, high, left, right);
         
-        return seg[index] = min(lans, rans);
+        return min(lans, rans);
+
+    }
+
+    ll querySum(ll index, ll low, ll high, ll left, ll right){
+        // no overlap [low, high] [l, r] or [l, r][low, high]
+        if (high < left || right < low){
+            return 0;
+        }
+
+        // complete overlap: node's range lies completely in query range [left, low, high, right]
+        if (left <= low && high <= right){
+            return seg[index].second;
+        }
+
+        // partial overlaps
+        ll mid = low + (high - low)/2;
+        ll lans = querySum(2*index+1, low, mid, left, right);
+        ll rans = querySum(2*index+2, mid+1, high, left, right);
+        
+        return lans + rans;;
 
     }
 
     void update(ll index, ll low, ll high, ll indToUpdate, ll valToUpdate){
         if (low == high){
-            seg[index] = valToUpdate;
+            seg[index].first = valToUpdate;
+            seg[index].second = valToUpdate;
             return;
         }
 
@@ -64,8 +86,8 @@ class SGTree{
         if (indToUpdate <= mid) update(2*index+1, low, mid, indToUpdate, valToUpdate);
         if (indToUpdate > mid) update(2*index+2, mid+1, high, indToUpdate, valToUpdate);
 
-        seg[index] = min(seg[2*index+1], seg[2*index+2]);
-
+        seg[index].first = min(seg[2*index+1].first, seg[2*index+2].first);
+        seg[index].second = seg[2*index+1].second + seg[2*index+2].second;
     }
 
 
@@ -75,23 +97,20 @@ class SGTree{
 
 int main() {
     FAST;
-    ll t;
-    // cin >> t;
-    // while(t--){
-        // solve();
-        ll n, q;
-        cin >> n;
-        vi a(n);
-        rep(i,0,n){cin >> a[i];}
-
-        SGTree s1;
-        s1.seg.resize(4*n);
-        s1.build(0, 0, n-1, a);
-        // cout << s1.query(0, 0, n-1, 1, 4) << endl;
-        // s1.update(0, 0, n-1, 4, 13);
-        // cout << s1.query(0, 0, n-1, 1, 4) << endl;
-        
+    ll n, q;
+    cin >> n >> q;
+    vi a(n);
+    rep(i,0,n){cin >> a[i];}
+    SGTree s1;
+    s1.seg.resize(4*n);
+    s1.build(0, 0, n-1, a);
+    
+    while(q--){
+        ll l, r;
+        cin >> l >> r;
+        cout << s1.querySum(0, 0, n-1, l, r-1) << endl;
        
-    // }
+    }
+    
     return 0;
 }
