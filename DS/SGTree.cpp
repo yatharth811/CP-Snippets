@@ -18,6 +18,10 @@ class SGTree{
     public:
     vector<pair<ll, ll>> seg;
 
+    SGTree(ll n){
+        seg.resize(4*n);
+    }
+
     void build(ll index, ll low, ll high, vector<ll>& arr){
 
         if (low == high){
@@ -101,8 +105,7 @@ int main() {
     cin >> n >> q;
     vi a(n);
     rep(i,0,n){cin >> a[i];}
-    SGTree s1;
-    s1.seg.resize(4*n);
+    SGTree s1(n);
     s1.build(0, 0, n-1, a);
     
     while(q--){
@@ -111,6 +114,6 @@ int main() {
         cout << s1.querySum(0, 0, n-1, l, r-1) << endl;
        
     }
-    
+
     return 0;
 }
