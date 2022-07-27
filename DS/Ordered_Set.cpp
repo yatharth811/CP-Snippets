@@ -38,6 +38,7 @@ void solve(){
     cout << A.order_of_key(7000) << endl;
 
     // lower bound and upper bound also available
+    // when using less_equal instead of less, the lower and upper bound behave opposite
     cout << *A.lower_bound(69) << endl;
     cout << *A.upper_bound(69) << endl;
 
@@ -48,6 +49,8 @@ void solve(){
         cout << x << " ";
     }
     cout << endl;
+
+    
 
 }
 
