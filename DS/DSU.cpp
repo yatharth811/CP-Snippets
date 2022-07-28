@@ -59,6 +59,10 @@ void solve(){
     dsu.unite(0, 1);
     cout << dsu.find(0) << endl;
     cout << dsu.find(1) << endl;
+    dsu.unite(1, 2);
+    cout << dsu.find(0) << endl;
+    cout << dsu.find(1) << endl;
+    cout << dsu.find(2) << endl;
 }
 
 
