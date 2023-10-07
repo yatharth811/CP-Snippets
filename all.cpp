@@ -83,6 +83,54 @@ struct LCA {
     }
 };
 
+struct LCA {
+  int n;
+  vector<vector<int>> dp;
+  vector<int> d;
+
+  void init(vector<int> parent, vector<int> depth) {
+    n = parent.size();
+    d = vector<int>(depth);
+    dp.assign(n, vector<int>(23, 0));
+    for (int i = 2; i < n; i += 1) {
+      dp[i][0] = parent[i];
+    }
+    for (int k = 1; k < 23; k += 1) {
+      for (int i = 1; i < n; i += 1) {
+        dp[i][k] = dp[dp[i][k - 1]][k - 1];
+      }
+    }
+  }
+
+  int query(int node, int level) {
+    bitset<22> l(level);
+    for (int i = 0; i < 22; i += 1) {
+      if (l[i]) {
+        node = dp[node][i];
+      }
+    }
+    return node;
+  }
+
+  int lca(int node_a, int node_b) {
+    if (d[node_a] != d[node_b]) {
+      node_a = query(node_a, max(d[node_a] - d[node_b], 0));
+      node_b = query(node_b, max(d[node_b] - d[node_a], 0));
+    }
+
+    if (node_a == node_b) {return node_a;}
+    else {
+      for (int i = 21; i >= 0; i -= 1) {
+        if (dp[node_a][i] != dp[node_b][i]) {
+          node_a = dp[node_a][i];
+          node_b = dp[node_b][i];
+        }
+      }
+      return dp[node_a][0];
+    }
+  }
+};
+
 // 3. DSU
 
 #define DISJOINT_SET_UNION
@@ -303,6 +351,94 @@ struct SGT {   //segtree implementation by geothermal
     return ans;
   }
 };
+
+// #include<bits/stdc++.h>
+// using namespace std;
+// #define int long long int
+
+int add(int x, int y) {return x + y;}
+int id() {return 0;}
+template<typename T, T (*op)(T, T), T (*id)()>
+class SegmentTree{
+  T sz;
+  vector<T> s;
+
+  void init(T n) {
+    sz = (n == 1 ? n : 1 << (32 - __builtin_clz(n - 1))) << 1;
+    --sz;
+    s.assign(sz, id());
+  }
+
+  public:
+  void build(vector<T> &a) {
+    int n = a.size();
+    init(n);
+    int ofs = (1 << (__builtin_popcount(sz & (sz - 1)))) - 1;
+    for (int i = 0; i < n; i += 1) {
+     s[i + ofs] = a[i]; 
+    }
+
+    for (int i = ofs - 1; i >= 0; i -= 1) {
+      s[i] = op(s[(i << 1) + 1], s[(i << 1) + 2]);
+    }
+  }
+
+  T query(T l, T r){
+    return query(l, r, 0, 0, (sz >> 1) + 1);
+  }
+
+  T query(T l, T r, T x, T left, T right) {
+    if (l >= right || r <= left) {
+      return id();
+    }
+    else if (l <= left && right <= r) {
+      return s[x];
+    }
+    else {
+      T mid = (left + right) >> 1;
+      return op(query(l, r, (x << 1) + 1, left, mid), query(l, r, (x << 1) + 2, mid, right));
+    }
+  }
+
+  void update(T index, T value) {
+    update(index, value, 0, 0, (sz >> 1) + 1);
+  }
+
+  void update(T index, T value, T x, T left, T right) {
+    if (right - left == 1) {
+      s[x] = value;
+      return;
+    }
+    T mid = (left + right) >> 1;
+    if (index < mid) {
+      update(index, value, (x << 1) + 1, left, mid);
+    }
+    else {
+      update(index, value, (x << 1) + 2, mid, right);
+    }
+    s[x] = op(s[(x << 1) + 1], s[(x << 1) + 2]);
+  }
+};
+
+
+// signed main() {
+//   int n, m;
+//   cin >> n >> m;
+//   vector<int> a(n);
+//   for (int i = 0; i < n; i += 1) {
+//     cin >> a[i];
+//   }
+
+//   SegmentTree<int, add, id> S;
+//   S.build(a);
+
+//   while(m--) {
+//     int l, r;
+//     cin >> l >> r;
+//     cout << S.query(l, r) << endl;
+//   }
+
+// }
 
 // 8. Sieve Prime
 
